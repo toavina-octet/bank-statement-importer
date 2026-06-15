@@ -1,0 +1,95 @@
+clients:
+  vinamora:
+    odoo:
+      version: 19
+      url: "https://vinamora-odoo.example.com"
+      database: "vinamora"
+      username: "technical-user@example.com"
+      password_env: "VINAMORA_ODOO_PASSWORD"
+    mailbox:
+      email: "bank-statements@example.com"
+      host: "imap.example.com"
+      port: 993
+      username: "bank-statements@example.com"
+      password_env: "VINAMORA_IMAP_PASSWORD"
+      folder: "INBOX"
+      use_ssl: true
+    banking:
+      authorized_senders:
+        - "releves@example-bank.com"
+
+  bcp:
+    odoo:
+      version: 19
+      url: "https://bcp-odoo.example.com"
+      database: "bcp"
+      username: "technical-user@example.com"
+      password_env: "BCP_ODOO_PASSWORD"
+    mailbox:
+      email: "bank-statements@example.com"
+      host: "imap.example.com"
+      port: 993
+      username: "bank-statements@example.com"
+      password_env: "BCP_IMAP_PASSWORD"
+      folder: "INBOX"
+      use_ssl: true
+    banking:
+      authorized_senders:
+        - "releves@example-bank.com"
+
+  octet:
+    odoo:
+      version: 17
+      url: "https://octet-odoo.example.com"
+      database: "octet"
+      username: "technical-user@example.com"
+      password_env: "OCTET_ODOO_PASSWORD"
+    mailbox:
+      email: "bank-statements@example.com"
+      host: "imap.example.com"
+      port: 993
+      username: "bank-statements@example.com"
+      password_env: "OCTET_IMAP_PASSWORD"
+      folder: "INBOX"
+      use_ssl: true
+    banking:
+      authorized_senders:
+        - "releves@example-bank.com"
+
+  sem:
+    odoo:
+      version: 17
+      url: "https://sem-odoo.example.com"
+      database: "sem"
+      username: "technical-user@example.com"
+      password_env: "SEM_ODOO_PASSWORD"
+    mailbox:
+      email: "bank-statements@example.com"
+      host: "imap.example.com"
+      port: 993
+      username: "bank-statements@example.com"
+      password_env: "SEM_IMAP_PASSWORD"
+      folder: "INBOX"
+      use_ssl: true
+    banking:
+      authorized_senders:
+        - "releves@example-bank.com"
+
+  sit_palais:
+    odoo:
+      version: 14
+      url: "https://sit-palais-odoo.example.com"
+      database: "sit_palais"
+      username: "technical-user@example.com"
+      password_env: "SIT_PALAIS_ODOO_PASSWORD"
+    mailbox:
+      email: "bank-statements@example.com"
+      host: "imap.example.com"
+      port: 993
+      username: "bank-statements@example.com"
+      password_env: "SIT_PALAIS_IMAP_PASSWORD"
+      folder: "INBOX"
+      use_ssl: true
+    banking:
+      authorized_senders:
+        - "releves@example-bank.com"
