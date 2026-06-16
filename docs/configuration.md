@@ -1,6 +1,6 @@
 # Guide de configuration
 
-Ce guide decrit les parametres requis pour connecter l'application aux boites mail, a Odoo et a n8n Cloud.
+Ce guide decrit les parametres requis pour connecter l'application aux boites mail, a Odoo et a un scheduler externe.
 
 ## Fichier `.env`
 
@@ -26,10 +26,10 @@ VINAMORA_IMAP_PASSWORD=secret
 
 Variables principales:
 
-- `RUN_MODE`: `api` en production avec n8n Cloud, `once` pour un passage manuel.
+- `RUN_MODE`: `api` en production (utilisé par un scheduler externe), `once` pour un passage manuel.
 - `API_HOST`: interface d'ecoute HTTP. En Docker, garder `0.0.0.0`.
 - `API_PORT`: port HTTP expose par le conteneur.
-- `API_TOKEN`: token bearer attendu par n8n Cloud.
+- `API_TOKEN`: token bearer attendu par le scheduler externe ou l'API publique.
 - `DATABASE_URL`: base SQLite de suivi et d'historique.
 - `LOGS_DIR`: dossier des logs persistants.
 - `LOG_MAX_BYTES`: taille maximum du fichier actif avant rotation.
@@ -75,12 +75,12 @@ Regles:
 ## Securite
 
 - Utiliser IMAPS avec `use_ssl: true`.
-- Utiliser HTTPS pour Odoo et pour l'endpoint public appele par n8n Cloud.
+- Utiliser HTTPS pour Odoo et pour l'endpoint public appele par un scheduler externe.
 - Generer un `API_TOKEN` long et aleatoire.
 - Restreindre l'acces au reverse proxy si possible, par IP ou WAF.
 - Ne jamais commit `.env` ni `config/clients.yml`.
 
-## Endpoint n8n Cloud
+## Endpoint de déclenchement
 
 URL:
 

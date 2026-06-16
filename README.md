@@ -10,7 +10,7 @@ Application Python conteneurisée pour récupérer automatiquement des relevés 
 - **Extraction PDF & OCR** : Extraction via `pdfplumber` avec fallback `pytesseract` pour les scans.
 - **Contrôle de Cohérente** : Vérification mathématique `Solde Initial + Mouvements = Solde Final`.
 - **Archivage Odoo** : Envoi automatique du PDF et des informations traitées vers `ir.attachment` via OdooRPC.
-- **Intégration n8n Cloud** : n8n sert de scheduler et déclenche l'API d'import périodiquement.
+- **Intégration Scheduler** : prise en charge d'un scheduler externe pour déclencher l'API d'import périodiquement.
 
 ## 🛠 Architecture & Dépendances
 
@@ -24,18 +24,17 @@ Application Python conteneurisée pour récupérer automatiquement des relevés 
 - [Guide de configuration](docs/configuration.md)
 - [Guide d'exploitation](docs/operations.md)
 - [Guide de mise en production](docs/production.md)
-- [Workflow n8n Cloud](docs/n8n-cloud-workflow.md)
+- [Workflow scheduler](docs/scheduler-workflow.md)
 
 ## ⚙️ Configuration
 
 ### 1. Variables d'environnement (`.env`)
-Copiez `.env.template` vers `.env` et remplissez les informations :
-- `DATABASE_URL` : Chemin vers la base SQLite (ex: `sqlite:///./data/bank_importer.sqlite3`).
-- `LOGS_DIR`, `LOG_FILE`, `LOG_MAX_BYTES`, `LOG_BACKUP_COUNT` : Fichier de logs et rotation.
-- `RUN_MODE` : `api` pour exposer un endpoint déclenché par n8n Cloud, `once` pour un passage manuel.
-- `POLL_INTERVAL_SECONDS` : délai entre deux recherches de nouveaux messages uniquement en mode `poll`.
-- `API_HOST`, `API_PORT`, `API_TOKEN` : interface HTTP et token bearer pour n8n Cloud.
-- `[CLIENT]_ODOO_PASSWORD`, `[CLIENT]_IMAP_PASSWORD` : mots de passe référencés dans le YAML.
+Copiez `.env.template` vers `.env` et remplissez les valeurs :
+
+- `.env.template` est la source de vérité pour les clés et exemples de valeurs — utilisez-le pour initialiser votre environnement.
+- Ne committez jamais le fichier `.env` contenant des secrets.
+- Les mots de passe spécifiques aux clients (ex: `VINAMORA_ODOO_PASSWORD`, `SIT_PALAIS_IMAP_PASSWORD`) doivent être définis dans `.env` et référencés depuis `config/clients.yml` via la clé `password_env`.
+- Pour des explications et exemples supplémentaires, consultez [docs/configuration.md](docs/configuration.md).
 
 ### 2. Configuration Clients (`config/clients.yml`)
 Définissez vos clients et leurs règles bancaires :
@@ -78,14 +77,15 @@ clients:
    docker compose up -d --build
    ```
 
-## 🔗 Intégration n8n Cloud (Conformité CDC)
+## 🔗 Intégration avec un scheduler
 
-En production, le service fonctionne avec `RUN_MODE=api`; n8n Cloud est responsable du déclenchement périodique via HTTP.
-1. **Étape 1** : n8n Cloud appelle `POST https://importer.example.com/api/import/run`.
+En production, le service fonctionne avec `RUN_MODE=api`. Le service doit être déployé sur un serveur (par exemple via `docker compose up -d --build`) et exposer une API HTTP publique (ou via un reverse proxy) que peut appeler un scheduler externe pour déclencher l'import.
+
+1. **Étape 1** : Le scheduler externe appelle `POST https://importer.example.com/api/import/run`.
 2. **Étapes 2-8** : Le script Python gère le mail, le PDF, les doublons et la cohérence.
 3. **Étape 9** : Le script persiste les informations traitées en SQLite (`/app/data/bank_importer.sqlite3`) pour l'historique et le suivi.
 4. **Étape 10** : Le script archive le PDF dans Odoo avec les informations traitées : client, compte, date, soldes, cohérence, expéditeur, UID e-mail et date de réception.
-5. **Étape 11** : n8n peut lire SQLite pour supervision, reporting ou relance, mais ne traite pas le relevé bancaire.
+5. **Étape 11** : Le scheduler peut lire SQLite pour supervision, reporting ou relance, mais ne traite pas le relevé bancaire.
 
 Endpoint de déclenchement:
 ```bash
@@ -103,7 +103,7 @@ curl -X POST https://importer.example.com/api/import/run \
   -d '{"client_slug":"sit_palais"}'
 ```
 
-### Requête SQL de suivi pour n8n :
+### Requête SQL de suivi :
 ```sql
 SELECT account_number, new_balance, client_slug, statement_date 
 FROM processed_documents 

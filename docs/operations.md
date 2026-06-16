@@ -4,7 +4,7 @@ Ce guide decrit les operations courantes: lancement, supervision, diagnostic et 
 
 ## Lancer le service API
 
-En production avec n8n Cloud:
+En production (déployé sur un serveur, déclenché par un scheduler externe) :
 
 ```bash
 docker compose up -d --build

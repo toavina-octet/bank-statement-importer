@@ -21,7 +21,7 @@ class ProcessedDocument(Base):
     message_uid: Mapped[str] = mapped_column(String(255), nullable=False)
     received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     
-    # New fields for n8n integration (CDC Step 9 & 10)
+    # New fields for scheduler integration (CDC Step 9 & 10)
     account_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     statement_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=False), nullable=True)
     old_balance: Mapped[float | None] = mapped_column(nullable=True)

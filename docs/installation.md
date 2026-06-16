@@ -8,7 +8,7 @@ Ce guide decrit l'installation de l'application d'import automatique des releves
 - Docker et Docker Compose.
 - Acces reseau sortant vers les serveurs IMAPS des boites mail.
 - Acces reseau sortant vers les instances Odoo en HTTPS.
-- Un domaine HTTPS public si n8n Cloud doit declencher l'application.
+-- Un domaine HTTPS public si un scheduler externe doit declencher l'application.
 - Comptes techniques Odoo pour chaque client.
 - Identifiants IMAPS pour chaque boite mail surveillee.
 
@@ -70,7 +70,7 @@ Pour lancer un passage unique sans API:
 RUN_MODE=once docker compose run --rm bank-importer
 ```
 
-Pour lancer le service API utilise par n8n Cloud:
+Pour lancer le service API utilisé par un scheduler externe:
 
 ```bash
 docker compose up -d --build

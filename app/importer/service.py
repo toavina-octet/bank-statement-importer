@@ -115,7 +115,7 @@ class StatementImportService:
                         self._logger.info("Statement imported successfully")
                         validate_statement_coherence(data)
                         
-                        # Persist data for n8n (Step 9)
+                        # Persist data for external scheduler or monitoring (Step 9)
                         doc_record.account_number = data.account_number
                         doc_record.statement_date = datetime.combine(
                             data.statement_date,

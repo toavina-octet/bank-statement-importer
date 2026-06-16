@@ -1,13 +1,13 @@
-# Workflow n8n Cloud
+# Workflow scheduler
 
-Ce workflow declenche l'application en production. n8n Cloud ne traite pas les releves: il planifie l'appel HTTP et alerte en cas d'erreur.
+Ce workflow declenche l'application en production. Le scheduler externe ne traite pas les releves: il planifie l'appel HTTP et alerte en cas d'erreur.
 
 ## Prerequis
 
-- L'application tourne avec `RUN_MODE=api`.
-- `API_TOKEN` est configure dans `.env`.
+- L'application tourne avec `RUN_MODE=api` et est déployée sur un serveur (via Docker Compose).
+- `API_TOKEN` est configuré dans `.env`.
 - Le serveur expose l'API en HTTPS, par exemple `https://importer.example.com`.
-- Le reverse proxy transfere les requetes vers `http://127.0.0.1:8080`.
+- Le reverse proxy transfère les requêtes vers `http://127.0.0.1:8080`.
 
 ## Nodes
 
@@ -49,7 +49,7 @@ Verifier que l'import a reussi:
 
 4. Notification d'erreur
 
-Sur la branche `false`, ajouter un node `Send Email`, `Slack`, `Microsoft Teams` ou autre canal d'alerte.
+Sur la branche `false`, ajouter un node de notification (Email, Slack, Teams, etc.)
 
 Message conseille:
 

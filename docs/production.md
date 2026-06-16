@@ -1,11 +1,11 @@
 # Guide de mise en production
 
-Ce guide decrit le deploiement cible avec n8n Cloud.
+Ce guide decrit le deploiement cible.
 
 ## Architecture cible
 
 ```text
-n8n Cloud
+Scheduler (ex: scheduler externe)
   -> HTTPS POST /api/import/run
   -> Reverse proxy public
   -> Application Docker bank-importer
@@ -15,7 +15,7 @@ n8n Cloud
   -> Logs locaux avec rotation
 ```
 
-n8n Cloud sert uniquement de scheduler. L'application traite les mails, extrait les PDF, controle les donnees et archive dans Odoo.
+Le scheduler (par ex. un service externe) sert uniquement à déclencher l'import périodique. L'application traite les mails, extrait les PDF, contrôle les données et archive dans Odoo.
 
 ## Preparation serveur
 
@@ -36,7 +36,7 @@ git clone <repository-url> bank-statement-importer
 cd bank-statement-importer
 ```
 
-Creer les dossiers persistants:
+Creer les dossiers persistants sur le serveur d'exécution (là où `docker compose` sera lancé) :
 
 ```bash
 mkdir -p data logs config
@@ -44,36 +44,29 @@ mkdir -p data logs config
 
 ## Configuration production
 
-Creer:
+Creer et preparer la configuration sur le serveur d'exécution (là où `docker compose` sera lancé) :
 
 ```bash
 cp .env.template .env
 cp config/clients.example.yml config/clients.yml
-```
 
-Dans `.env`:
-
-```bash
-RUN_MODE=api
-API_HOST=0.0.0.0
-API_PORT=8080
-API_TOKEN=<token-long-aleatoire>
-DATABASE_URL=sqlite:///./data/bank_importer.sqlite3
-CLIENTS_CONFIG_PATH=./config/clients.yml
-```
-
-Completer les secrets:
-
-```bash
-SIT_PALAIS_ODOO_PASSWORD=<secret>
-SIT_PALAIS_IMAP_PASSWORD=<secret>
+# Editer .env et renseigner les secrets (ne pas commit)
+# Exemples à définir dans .env:
+# RUN_MODE=api
+# API_HOST=0.0.0.0
+# API_PORT=8080
+# API_TOKEN=<token-long-aleatoire>
+# DATABASE_URL=sqlite:///./data/bank_importer.sqlite3
+# CLIENTS_CONFIG_PATH=./config/clients.yml
+# SIT_PALAIS_ODOO_PASSWORD=<secret>
+# SIT_PALAIS_IMAP_PASSWORD=<secret>
 ```
 
 Dans `config/clients.yml`, renseigner les clients reels.
 
 ## Reverse proxy HTTPS
 
-n8n Cloud doit appeler une URL HTTPS publique. Le reverse proxy doit transferer vers l'application locale.
+n'importe quel scheduler doit appeler une URL HTTPS publique. Le reverse proxy doit transferer vers l'application locale.
 
 Exemple Nginx:
 
@@ -124,9 +117,9 @@ curl -X POST https://importer.example.com/api/import/run \
   -d '{}'
 ```
 
-## Workflow n8n Cloud
+## Workflow scheduler
 
-Le workflow detaille est decrit dans `docs/n8n-cloud-workflow.md`.
+Le workflow detaille est decrit dans `docs/scheduler-workflow.md`.
 
 Resume:
 
