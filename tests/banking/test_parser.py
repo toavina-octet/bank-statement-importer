@@ -155,3 +155,22 @@ def test_bni_parser_classifies_vb_vs_as_debit() -> None:
         False,
         False,
     ]
+
+
+def test_bni_parser_treats_pc_as_debit() -> None:
+    sample_text = """
+    RELEVE DE COMPTE
+    BNI MADAGASCAR
+    Compte N° 27234520100-79
+    du 01/06/2026 au 02/06/2026
+    Ancien solde au 01/06/2026 100.000,00
+    Pièce Date Nature de l'opération Valeur Débit Crédit
+    PC260605821 02/06/26 FCT SIT-26-0153 SIT PALA 01062 01/06/26 50.000,00
+    Nouveau solde au 02/06/2026 50.000,00
+    """
+
+    data = GenericParser().parse(sample_text)
+
+    assert len(data.transactions) == 1
+    assert data.transactions[0].label == "FCT SIT-26-0153 SIT PALA 01062"
+    assert data.transactions[0].is_credit is False

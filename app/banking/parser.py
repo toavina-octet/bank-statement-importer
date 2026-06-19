@@ -100,7 +100,7 @@ class BniStatementParser(BaseParser):
     """Parser for BNI Madagascar account statement PDFs."""
 
     _amount_pattern = r"\d{1,3}(?:\.\d{3})*,\d{2}"
-    _debit_prefixes = ("PR", "CR", "VB", "VS")
+    _debit_prefixes = ("PR", "CR", "VB", "VS", "PC")
     _credit_prefixes = ("VA", "VR")
     _debit_keywords = (
         "PRELEVEMENT",
@@ -109,6 +109,8 @@ class BniStatementParser(BaseParser):
         "COMMISSION",
         "IMPOT",
         "FRAIS SUR VIREMENT",
+        "FACTURE",
+        "FCT",
     )
     _credit_keywords = ("BCN VIRT", "VIREMENT", "VERSEMENT")
 
@@ -169,12 +171,17 @@ class BniStatementParser(BaseParser):
         transactions: list[Transaction] = []
         current_index: int | None = None
 
+        row_pattern = re.compile(
+            rf"^([A-Z]{{2}}\d+)\s+"
+            rf"(\d{{2}}/\d{{2}}/\d{{2}})\s+"
+            rf"(.+?)\s+"
+            rf"(\d{{2}}/\d{{2}}/\d{{2}})\s+"
+            rf"(?:(?P<debit>{self._amount_pattern})\s+(?P<credit>{self._amount_pattern})(?:\s+{self._amount_pattern})?|(?P<amount>{self._amount_pattern})(?:\s+{self._amount_pattern})?)$",
+            re.IGNORECASE,
+        )
+
         for line in lines:
-            match = re.match(
-                rf"^([A-Z]{{2}}\d+)\s+(\d{{2}}/\d{{2}}/\d{{2}})\s+(.+?)\s+"
-                rf"(\d{{2}}/\d{{2}}/\d{{2}})\s+({self._amount_pattern})$",
-                line,
-            )
+            match = row_pattern.match(line)
             if not match:
                 if current_index is not None and not self._is_statement_noise(line):
                     current = transactions[current_index]
@@ -186,12 +193,34 @@ class BniStatementParser(BaseParser):
                     )
                 continue
 
-            operation_code, operation_date, label, _value_date, amount = match.groups()
+            operation_code = match.group(1)
+            operation_date = match.group(2)
+            label = match.group(3)
+            amount = match.group("amount")
+            debit_amount = match.group("debit")
+            credit_amount = match.group("credit")
+
+            if debit_amount or credit_amount:
+                if credit_amount and not debit_amount:
+                    transaction_amount = _parse_localized_decimal(credit_amount)
+                    is_credit = True
+                elif debit_amount and not credit_amount:
+                    transaction_amount = _parse_localized_decimal(debit_amount)
+                    is_credit = False
+                else:
+                    transaction_amount = _parse_localized_decimal(credit_amount or debit_amount)
+                    is_credit = self._is_credit_operation(operation_code, label)
+            elif amount:
+                transaction_amount = _parse_localized_decimal(amount)
+                is_credit = self._is_credit_operation(operation_code, label)
+            else:
+                raise ParsingError(f"transaction amount not found for line: {line}")
+
             transaction = Transaction(
                 date=self._parse_short_date(operation_date, statement_year),
-                label=f"{operation_code} {label}".strip(),
-                amount=_parse_localized_decimal(amount),
-                is_credit=self._is_credit_operation(operation_code, label),
+                label=label.strip(),
+                amount=transaction_amount,
+                is_credit=is_credit,
             )
             transactions.append(transaction)
             current_index = len(transactions) - 1

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session
 
+from app.banking.models import StatementData
 from app.banking.parser import BaseParser, ParsingError
 from app.banking.validator import CoherenceError, validate_statement_coherence
 from app.config import ClientConfig
@@ -113,7 +114,29 @@ class StatementImportService:
                         text = self._pdf_extractor.extract_text(saved_attachment.path)
                         data = self._parser.parse(text)
                         self._logger.info("Statement imported successfully")
-                        validate_statement_coherence(data)
+
+                        if self._odoo_client:
+                            last_balance = self._odoo_client.get_last_statement_balance(
+                                data.account_number,
+                            )
+                            if last_balance is not None:
+                                if last_balance != data.old_balance:
+                                    self._logger.info(
+                                        "Replacing parsed old balance with last Odoo ending balance for %s: %s",
+                                        data.account_number,
+                                        last_balance,
+                                    )
+                                data = StatementData(
+                                    account_number=data.account_number,
+                                    statement_date=data.statement_date,
+                                    old_balance=last_balance,
+                                    new_balance=data.new_balance,
+                                    transactions=data.transactions,
+                                )
+                            else:
+                                validate_statement_coherence(data)
+                        else:
+                            validate_statement_coherence(data)
                         
                         # Persist data for external scheduler or monitoring (Step 9)
                         doc_record.account_number = data.account_number
