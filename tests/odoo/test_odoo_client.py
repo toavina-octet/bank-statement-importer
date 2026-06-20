@@ -316,8 +316,11 @@ def test_archive_statement_creates_bank_statement_when_date_missing(monkeypatch,
 
     class FakeStatementModel:
         def search(self, domain: list[tuple[str, str, object]], **kwargs):
-            assert domain == [("journal_id", "=", 11), ("date", "=", "2026-06-10")]
-            return []
+            if domain == [("journal_id", "=", 11), ("date", "=", "2026-06-10")]:
+                return []
+            if domain == [("journal_id", "=", 11), ("date", "<", date.today().isoformat())]:
+                return []
+            raise AssertionError(f"Unexpected domain: {domain}")
 
         def create(self, values: dict[str, object]) -> int:
             created_statement_values.update(values)
@@ -417,13 +420,6 @@ def test_archive_statement_creates_bank_statement_when_date_missing(monkeypatch,
             "payment_ref": "TX2",
             "amount": "150.00",
         },
-        {
-            "statement_id": 22,
-            "date": "2026-06-10",
-            "name": "Ajustement solde final",
-            "payment_ref": "Ajustement solde final",
-            "amount": "200.00",
-        },
     ]
     assert created_values["res_model"] == "account.bank.statement"
     assert created_values["res_id"] == 22
@@ -444,7 +440,7 @@ def test_get_last_statement_balance_from_odoo_statement(monkeypatch) -> None:
 
     class FakeStatementModel:
         def search(self, domain: list[tuple[str, str, object]], **kwargs):
-            assert domain == [("journal_id", "=", 11)]
+            assert domain == [("journal_id", "=", 11), ("date", "<", date.today().isoformat())]
             return [22]
 
         def browse(self, statement_id: int) -> FakeStatementRecord:
@@ -502,7 +498,7 @@ def test_get_last_statement_balance_returns_none_when_no_statement(monkeypatch) 
 
     class FakeStatementModel:
         def search(self, domain: list[tuple[str, str, object]], **kwargs):
-            assert domain == [("journal_id", "=", 11)]
+            assert domain == [("journal_id", "=", 11), ("date", "<", date.today().isoformat())]
             return 0
 
     class FakeAttachmentModel:

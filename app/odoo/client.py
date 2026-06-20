@@ -9,8 +9,7 @@ from urllib.parse import urlparse
 
 import odoorpc
 
-from app.banking.models import StatementData
-from app.models import Transaction
+from app.banking.models import StatementData, Transaction
 
 logger = logging.getLogger(__name__)
 
