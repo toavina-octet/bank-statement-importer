@@ -20,7 +20,7 @@ class ProcessedDocument(Base):
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     message_uid: Mapped[str] = mapped_column(String(255), nullable=False)
     received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    
+
     # New fields for scheduler integration (CDC Step 9 & 10)
     account_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
     statement_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=False), nullable=True)

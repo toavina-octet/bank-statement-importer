@@ -26,20 +26,20 @@ def test_generic_parser_extracts_data() -> None:
     
     Nouveau solde au 01/06/2026: 2 550,00 EUR
     """
-    
+
     parser = GenericParser()
     data = parser.parse(sample_text)
-    
+
     assert data.account_number == "FR7630001007000001234567890"
     assert data.statement_date == date(2026, 6, 1)
     assert data.old_balance == Decimal("1000.00")
     assert data.new_balance == Decimal("2550.00")
-    
+
     assert len(data.transactions) == 3
     assert data.transactions[0].label == "VIREMENT RECU SALAIRE"
     assert data.transactions[0].amount == Decimal("2500.00")
     assert data.transactions[0].is_credit is True
-    
+
     assert data.transactions[1].label == "LOYER"
     assert data.transactions[1].amount == Decimal("800.00")
     assert data.transactions[1].is_credit is False

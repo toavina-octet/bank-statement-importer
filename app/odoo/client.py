@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 import odoorpc
 
 from app.banking.models import StatementData
+from app.models import Transaction
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class OdooClient:
         self.username = username
         self.password = password
         self.version = version
-        
+
         # Initialize OdooRPC
         # Parse host and port from the configured URL.
         parsed_url = urlparse(url)
@@ -123,7 +124,10 @@ class OdooClient:
             logger.info("No Odoo journal mapping found for account %s", account_number)
             return None
 
-        statement_id = self._find_last_bank_statement_id(journal_id,current_date=date.today(),)
+        statement_id = self._find_last_bank_statement_id(
+            journal_id,
+            current_date=date.today(),
+        )
         if statement_id is None:
             logger.info("No bank statement found in Odoo for journal id=%s", journal_id)
             return None
@@ -231,10 +235,7 @@ class OdooClient:
 
             statement_id = self._odoo.env["account.bank.statement"].create(statement_values)
             if statement_id is not None:
-                self._create_bank_statement_lines(
-                    statement_id,
-                    data.transactions
-                )
+                self._create_bank_statement_lines(statement_id, data.transactions)
             return statement_id
         except Exception as exc:
             logger.warning(
@@ -248,7 +249,7 @@ class OdooClient:
     def _update_bank_statement(self, statement_id: int, data: StatementData) -> bool:
         try:
             statement_record = self._odoo.env["account.bank.statement"].browse(statement_id)
-            
+
             last_balance = self.get_last_statement_balance(data.account_number)
             if last_balance is None:
                 last_balance = data.old_balance
@@ -271,10 +272,7 @@ class OdooClient:
             if line_ids not in (None, False, 0, []):
                 self._odoo.env["account.bank.statement.line"].unlink(line_ids)
 
-            self._create_bank_statement_lines(
-                statement_id,
-                data.transactions
-            )
+            self._create_bank_statement_lines(statement_id, data.transactions)
 
             return True
         except Exception as exc:
@@ -288,7 +286,7 @@ class OdooClient:
     def _create_bank_statement_lines(
         self,
         statement_id: int,
-        transactions: tuple["Transaction", ...],
+        transactions: tuple[Transaction, ...],
     ) -> Decimal:
         total = Decimal("0.00")
         try:
@@ -346,12 +344,9 @@ class OdooClient:
         **kwargs,
     ) -> int | None:
         normalized_domain = [
-            (field, operator, self._normalize_value(value))
-            for field, operator, value in domain
+            (field, operator, self._normalize_value(value)) for field, operator, value in domain
         ]
-        normalized_kwargs = {
-            key: self._normalize_value(value) for key, value in kwargs.items()
-        }
+        normalized_kwargs = {key: self._normalize_value(value) for key, value in kwargs.items()}
 
         record_ids = self._odoo.env[model_name].search(
             normalized_domain,

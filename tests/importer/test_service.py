@@ -30,7 +30,7 @@ def test_import_service_saves_authorized_pdf_and_registers_hash(tmp_path: Path) 
     message = _message(sender="Bank <releves@example-bank.com>")
     collector = FakeCollector([message])
     session_factory = _session_factory()
-    
+
     mock_extractor = MagicMock()
     mock_extractor.extract_text.return_value = "dummy text"
     mock_parser = MagicMock()
@@ -67,7 +67,9 @@ def test_import_service_saves_authorized_pdf_and_registers_hash(tmp_path: Path) 
         mock_odoo.archive_statement.assert_called_once()
 
 
-def test_import_service_uses_last_odoo_balance_as_initial_balance(tmp_path: Path, monkeypatch) -> None:
+def test_import_service_uses_last_odoo_balance_as_initial_balance(
+    tmp_path: Path, monkeypatch
+) -> None:
     message = _message(sender="Bank <releves@example-bank.com>")
     collector = FakeCollector([message])
     session_factory = _session_factory()
@@ -125,8 +127,12 @@ def test_import_service_preserves_transactions_after_odoo_balance_override(tmp_p
         old_balance=Decimal("1000.00"),
         new_balance=Decimal("1050.00"),
         transactions=(
-            Transaction(date=datetime.now().date(), label="TX1", amount=Decimal("100.00"), is_credit=False),
-            Transaction(date=datetime.now().date(), label="TX2", amount=Decimal("150.00"), is_credit=True),
+            Transaction(
+                date=datetime.now().date(), label="TX1", amount=Decimal("100.00"), is_credit=False
+            ),
+            Transaction(
+                date=datetime.now().date(), label="TX2", amount=Decimal("150.00"), is_credit=True
+            ),
         ),
     )
     mock_odoo = MagicMock()

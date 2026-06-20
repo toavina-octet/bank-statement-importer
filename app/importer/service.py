@@ -122,7 +122,10 @@ class StatementImportService:
                             if last_balance is not None:
                                 if last_balance != data.old_balance:
                                     self._logger.info(
-                                        "Replacing parsed old balance with last Odoo ending balance for %s: %s",
+                                        (
+                                            "Replacing parsed old balance with "
+                                            "last Odoo ending balance for %s: %s"
+                                        ),
                                         data.account_number,
                                         last_balance,
                                     )
@@ -137,7 +140,7 @@ class StatementImportService:
                                 validate_statement_coherence(data)
                         else:
                             validate_statement_coherence(data)
-                        
+
                         # Persist data for external scheduler or monitoring (Step 9)
                         doc_record.account_number = data.account_number
                         doc_record.statement_date = datetime.combine(
@@ -147,7 +150,7 @@ class StatementImportService:
                         doc_record.old_balance = float(data.old_balance)
                         doc_record.new_balance = float(data.new_balance)
                         doc_record.is_coherent = True
-                        
+
                         if self._odoo_client:
                             attachment_id = self._odoo_client.archive_statement(
                                 data=data,
@@ -159,11 +162,11 @@ class StatementImportService:
                                 is_coherent=True,
                             )
                             doc_record.odoo_attachment_id = attachment_id
-                            
+
                             audit_logger.log_import_success(
                                 client=self._client.slug,
                             )
-                        
+
                     except (
                         PdfExtractionError,
                         ParsingError,
@@ -250,11 +253,7 @@ def _build_summary(
         imported_documents=sum(outcome.status == "imported" for outcome in outcomes),
         duplicate_documents=sum(outcome.status == "duplicate" for outcome in outcomes),
         rejected_messages=len(
-            {
-                outcome.message_uid
-                for outcome in outcomes
-                if outcome.status == "rejected"
-            }
+            {outcome.message_uid for outcome in outcomes if outcome.status == "rejected"}
         ),
         outcomes=tuple(outcomes),
     )

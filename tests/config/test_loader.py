@@ -53,9 +53,7 @@ clients:
 
 def test_odoo_password_is_resolved_from_environment() -> None:
     config = load_clients_config(Path("config/clients.example.yml"))
-    password = config.get_client("vinamora").odoo.get_password(
-        {"VINAMORA_ODOO_PASSWORD": "secret"}
-    )
+    password = config.get_client("vinamora").odoo.get_password({"VINAMORA_ODOO_PASSWORD": "secret"})
 
     assert password == "secret"
 

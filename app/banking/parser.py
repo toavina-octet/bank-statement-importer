@@ -85,7 +85,6 @@ class GenericParser(BaseParser):
                 # In a real scenario, we'd need to determine if it's credit or debit.
                 # Here we use the sign if present, otherwise assume credit for simplicity.
                 transactions.append(
-                    
                     Transaction(
                         date=datetime.now().date(),  # Year is usually missing in lines
                         label=label,
@@ -246,9 +245,7 @@ class BniStatementParser(BaseParser):
         if any(keyword in normalized_label for keyword in self._credit_keywords):
             return True
 
-        raise ParsingError(
-            f"cannot determine debit/credit column for {operation_code}: {label}"
-        )
+        raise ParsingError(f"cannot determine debit/credit column for {operation_code}: {label}")
 
     def _is_statement_noise(self, line: str) -> bool:
         normalized = line.upper()

@@ -19,7 +19,7 @@ class PdfExtractor:
 
     def extract_text(self, pdf_path: Path) -> str:
         """
-        Extract text from a PDF file. 
+        Extract text from a PDF file.
         Falls back to OCR if the extracted text is too short.
         """
         try:
@@ -30,7 +30,7 @@ class PdfExtractor:
                     full_text += text + "\n"
 
             full_text = full_text.strip()
-            
+
             if len(full_text) < self.ocr_threshold:
                 logger.info(
                     "Extracted text too short (%d chars). Starting OCR for %s",
@@ -59,7 +59,7 @@ class PdfExtractor:
                     img = page.to_image(resolution=300).original
                     text = pytesseract.image_to_string(img)
                     ocr_text += text + "\n"
-            
+
             return ocr_text.strip()
         except Exception as exc:
             logger.error("OCR failed for %s: %s", pdf_path, exc)

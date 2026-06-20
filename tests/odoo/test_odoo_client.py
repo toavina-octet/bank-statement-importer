@@ -212,7 +212,9 @@ def test_archive_statement_attaches_to_statement_by_date(monkeypatch, tmp_path) 
     created_values: dict[str, object] = {}
 
     class FakeStatementRecord:
-        def __init__(self, balance_end: Decimal | None = None, balance_end_real: Decimal | None = None) -> None:
+        def __init__(
+            self, balance_end: Decimal | None = None, balance_end_real: Decimal | None = None
+        ) -> None:
             self.balance_end = balance_end
             self.balance_end_real = balance_end_real
 
@@ -379,8 +381,12 @@ def test_archive_statement_creates_bank_statement_when_date_missing(monkeypatch,
             old_balance=Decimal("1000.00"),
             new_balance=Decimal("1250.00"),
             transactions=(
-                Transaction(date=date(2026, 6, 10), label="TX1", amount=Decimal("100.00"), is_credit=False),
-                Transaction(date=date(2026, 6, 10), label="TX2", amount=Decimal("150.00"), is_credit=True),
+                Transaction(
+                    date=date(2026, 6, 10), label="TX1", amount=Decimal("100.00"), is_credit=False
+                ),
+                Transaction(
+                    date=date(2026, 6, 10), label="TX2", amount=Decimal("150.00"), is_credit=True
+                ),
             ),
         ),
         pdf_path=pdf_path,
@@ -425,7 +431,9 @@ def test_archive_statement_creates_bank_statement_when_date_missing(monkeypatch,
 
 def test_get_last_statement_balance_from_odoo_statement(monkeypatch) -> None:
     class FakeStatementRecord:
-        def __init__(self, balance_end: Decimal | None = None, balance_end_real: Decimal | None = None) -> None:
+        def __init__(
+            self, balance_end: Decimal | None = None, balance_end_real: Decimal | None = None
+        ) -> None:
             self.balance_end = balance_end
             self.balance_end_real = balance_end_real
 
@@ -541,7 +549,9 @@ def test_archive_statement_attaches_to_last_statement(monkeypatch, tmp_path) -> 
     created_values: dict[str, object] = {}
 
     class FakeStatementRecord:
-        def __init__(self, balance_end: Decimal | None = None, balance_end_real: Decimal | None = None) -> None:
+        def __init__(
+            self, balance_end: Decimal | None = None, balance_end_real: Decimal | None = None
+        ) -> None:
             self.balance_end = balance_end
             self.balance_end_real = balance_end_real
 
